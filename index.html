@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>EVOLUCION</title>
    
@@ -204,25 +204,32 @@
 
 
 /* Visor de Imagenes */
-/* Visor de Imagenes */
+/* ================================
+   VISOR DE IMÁGENES - ESTILO FB
+================================ */
+
+/* Fondo oscuro */
 .visor-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.9);
     z-index: 9999;
+
+    /* Suavidad al aparecer */
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.25s ease;
 }
 
+/* Mostrar visor */
 .visor-overlay.active {
     display: flex;
     opacity: 1;
 }
 
+/* Contenedor principal */
 .visor-content {
     position: relative;
     width: 100%;
@@ -232,31 +239,35 @@
     justify-content: center;
 }
 
+/* Caja interna */
 .visor-inner {
     display: flex;
     max-width: 95%;
     max-height: 95%;
     background: #000000;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     position: relative;
 }
 
+/* Contenedor de imagen con scroll (panorámica) */
 .visor-image-container {
-    /* FUNDAMENTAL: Permite el scroll cuando la imagen está con zoom (Panorámica) */
-    overflow: scroll; 
     position: relative;
+    flex: 1;
+    min-width: 0;
+    background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #000000;
-    flex: 1;
-    min-width: 0;
-    
-    /* Previene el zoom accidental del navegador en este contenedor */
-    touch-action: none; 
+
+    /* Para mover la imagen cuando hay zoom */
+    overflow: scroll;
+
+    /* Previene zoom nativo accidental */
+    touch-action: none;
 }
 
+/* Imagen */
 .visor-image {
     max-width: 100%;
     max-height: 95vh;
@@ -265,37 +276,38 @@
     display: block;
     object-fit: contain;
     cursor: zoom-in;
-    position: relative;
-    z-index: 1;
-    
-    /* === ESTILOS PARA EL ZOOM Y PANORÁMICA === */
-    transition: transform 0.3s ease-out; /* Transición suave para el doble clic */
-    transform-origin: center center;
-    transform: scale(1); /* Escala inicial */
     user-select: none;
+    position: relative;
+
+    /* Suavidad al hacer zoom por doble tap */
+    transition: transform 0.28s ease-out;
+    transform-origin: center center;
+    transform: scale(1);
 }
 
-/* === CLASE PARA EL ESTADO DE ZOOM ACTIVO === */
+/* Estado de zoom */
 .visor-image.is-zoomed {
-    /* El factor de escala será controlado por JS, pero esta clase asegura los estilos */
     cursor: grab;
-    /* Anular max-width/max-height al hacer zoom para que funcione el scroll/arrastre */
+
+    /* Permite scroll al hacer zoom */
     max-width: none;
     max-height: none;
 }
 
+/* Sidebar (descripción) */
 .visor-sidebar {
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.676), rgb(0, 0, 0), rgb(0, 0, 0));
-    width: 400px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgb(0, 0, 0));
+    width: 380px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
     position: absolute;
     right: 0;
     top: 0;
     bottom: 0;
-    z-index: 2;
+    z-index: 3;
+
+    transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .visor-sidebar.hidden {
@@ -305,37 +317,36 @@
 }
 
 .visor-description {
-    padding: 20px;
+    padding: 22px;
     font-size: 15px;
     line-height: 1.6;
-    color: #fffdfd;
-    flex: 1;
+    color: #f1f1f1;
 }
 
-
-
+/* Botón cerrar */
 .visor-close-btn {
     position: absolute;
-    top: 30px;
-    right: 25px;
-    width: 50px;
-    height: 50px;
-    background: rgba(0, 0, 0, 0.9);
+    top: 28px;
+    right: 22px;
+    width: 48px;
+    height: 48px;
     border: none;
+    background: rgba(20, 20, 20, 0.8);
     border-radius: 50%;
-    font-size: 24px;
+    color: white;
+    font-size: 27px;
     cursor: pointer;
+    z-index: 10000;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10001;
-    transition: all 0.3s ease;
-    color: #ededed;
-    font-weight: bold;
+
+    transition: all 0.25s ease;
 }
 
 .visor-close-btn:hover {
-    background: rgb(216, 216, 216);
+    background: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
 }
 
@@ -344,62 +355,43 @@
     pointer-events: none;
 }
 
-/* Responsive - Desktop (2 columnas) */
-@media (min-width: 768px) {
-    .feed-container {
-        grid-template-columns: repeat(2, 1fr);
-        padding: 0;
-    }
+/* ================================
+   RESPONSIVE
+================================ */
 
+/* 🖥️ Desktop */
+@media (min-width: 768px) {
     .visor-inner {
         width: 90vw;
         height: 90vh;
     }
 
-    .visor-image-container {
-        width: 100%;
-        height: 100%;
+    .visor-image {
+        max-height: 90vh;
     }
 }
 
-/* Responsive - Móvil (1 columna) */
+/* 📱 Móviles */
 @media (max-width: 767px) {
-    .feed-container {
-        grid-template-columns: 1fr;
-        gap: 0;
-        padding: 0;
-    }
-
-    .post-card {
-        border-radius: 0;
-        margin-bottom: 10px;
-    }
-
-    .titulo-destacado {
-        font-size: 22px;
-        margin-bottom: 20px;
-    }
 
     .visor-inner {
         flex-direction: column;
         max-width: 100%;
         max-height: 100%;
-        border-radius: 0;
         width: 100%;
         height: 100%;
+        border-radius: 0;
     }
 
     .visor-image-container {
         width: 100%;
-        height: 70vh;
-        position: relative;
+        height: 72vh;
     }
 
     .visor-sidebar {
         width: 100%;
-        height: 30vh;
-        max-height: 30vh;
-        position: absolute;
+        height: 28vh;
+        max-height: 28vh;
         bottom: 0;
         left: 0;
         right: 0;
@@ -411,26 +403,20 @@
     }
 
     .visor-close-btn {
-        top: 25px;
-        right: 20px;
-        width: 36px;
-        height: 36px;
-        font-size: 50px;
+        width: 38px;
+        height: 38px;
+        font-size: 20px;
+        top: 18px;
+        right: 15px;
     }
 }
 
-/* Tablets  */
+/* Tablet */
 @media (min-width: 768px) and (max-width: 1024px) {
     .visor-sidebar {
         width: 300px;
     }
 }
-
-
-
-
-
-
 
 .hr-fade {
    
@@ -2060,272 +2046,286 @@ border-radius: 50%; /* Sugerencia para que se vea bien durante la rotación */
 
 
 
+document.addEventListener('DOMContentLoaded', () => {
 
-        
-        
-        
-        
-        
-        
-        document.addEventListener('DOMContentLoaded', () => {
+  const visor = document.getElementById('visorImagenes');
+  const imagenVisor = document.getElementById('imagenVisor');
+  const descripcionVisor = document.getElementById('descripcionVisor');
+  const sidebarVisor = document.getElementById('sidebarVisor');
+  const btnCerrar = document.getElementById('btnCerrarVisor');
+  const postImages = document.querySelectorAll('.post-image');
 
-const visor = document.getElementById('visorImagenes');
-const imagenVisor = document.getElementById('imagenVisor');
-const descripcionVisor = document.getElementById('descripcionVisor');
-const sidebarVisor = document.getElementById('sidebarVisor');
-const btnCerrar = document.getElementById('btnCerrarVisor');
-const postImages = document.querySelectorAll('.post-image');
+  // Contenedor que controla el scroll/panning
+  const imageContainer = imagenVisor.closest('.visor-image-container');
 
-// Contenedor de la imagen (necesario para la panorámica/scroll)
-const imageContainer = imagenVisor.closest('.visor-image-container');
+  // Estado
+  let isDescriptionVisible = true;
+  let currentScale = 1;
+  const MAX_SCALE = 3; // puedes ajustar
+  const MIN_SCALE = 1;
 
-// Estado global de la interfaz
-let isDescriptionVisible = true;
-let currentScale = 1; // Escala actual de la imagen (1 = sin zoom)
-const MAX_SCALE = 2.5; // Escala máxima para el doble clic/zoom
+  // Para pinch y double-tap
+  let initialPinchDistance = null;
+  let lastTap = {time: 0, x: 0, y: 0};
+  let touchStartPos = null;
+  let touchMoved = false;
 
-// Variables para el Pinch-to-Zoom y Panorámica (Panning)
-let initialPinchDistance = null;
-let isPanning = false;
+  // Guardar dimensiones naturales
+  let naturalW = 0;
+  let naturalH = 0;
 
-// ====================================================
-// 0. Funciones de UTILIDAD
-// ====================================================
-
-/**
- * Alterna la visibilidad de la barra lateral (descripción) y el botón de cerrar.
- * @param {boolean} visible - True para mostrar, False para ocultar.
- */
-function toggleSidebarVisibility(visible) {
+  /* -------------------
+     UTILIDADES
+  --------------------*/
+  function toggleSidebarVisibility(visible) {
     if (visible) {
-        sidebarVisor.classList.remove('hidden');
-        btnCerrar.classList.remove('hidden');
+      sidebarVisor.classList.remove('hidden');
+      btnCerrar.classList.remove('hidden');
     } else {
-        sidebarVisor.classList.add('hidden');
-        btnCerrar.classList.add('hidden');
+      sidebarVisor.classList.add('hidden');
+      btnCerrar.classList.add('hidden');
     }
     isDescriptionVisible = visible;
-}
+  }
 
-/**
- * Aplica o quita el zoom máximo y gestiona la panorámica (scroll).
- * @param {boolean} forceZoom - Forzar el estado de zoom (true/false).
- */
-function toggleZoom(forceZoom) {
-    // Si no se especifica, alternar el estado
-    const shouldZoom = forceZoom !== undefined ? forceZoom : currentScale === 1;
+  // Aplica dimensiones reales según scale y opcionalmente centra en (cx,cy) relativo a la imagen natural
+  function applyScale(scale, focal = null) {
+    scale = Math.max(MIN_SCALE, Math.min(scale, MAX_SCALE));
+    currentScale = scale;
 
-    if (shouldZoom) {
-        // Aplicar Zoom
-        currentScale = MAX_SCALE;
-        imagenVisor.style.transform = `scale(${MAX_SCALE})`;
-        imagenVisor.classList.add('is-zoomed');
-        
-        // Ocultar la descripción al hacer zoom (Comportamiento Facebook)
-        toggleSidebarVisibility(false);
+    // Aplicar width/height reales
+    const w = Math.round(naturalW * scale);
+    const h = Math.round(naturalH * scale);
+    imagenVisor.style.width = `${w}px`;
+    imagenVisor.style.height = `${h}px`;
+    imagenVisor.classList.toggle('is-zoomed', scale > 1);
 
-        // Intentar centrar la imagen al aplicar zoom
-        // Se usa setTimeout para asegurar que la imagen ha escalado en el DOM
-        setTimeout(() => {
-            if (imageContainer) {
-                imageContainer.scrollLeft = (imagenVisor.clientWidth * currentScale - imageContainer.clientWidth) / 2;
-                imageContainer.scrollTop = (imagenVisor.clientHeight * currentScale - imageContainer.clientHeight) / 2;
-            }
-        }, 300);
+    // Mostrar / ocultar sidebar
+    if (scale > 1) toggleSidebarVisibility(false);
+    else toggleSidebarVisibility(true);
 
-    } else {
-        // Quitar Zoom (Restaurar)
-        currentScale = 1;
-        imagenVisor.style.transform = 'scale(1)';
-        imagenVisor.classList.remove('is-zoomed');
-
-        // Mostrar la descripción al quitar el zoom
-        toggleSidebarVisibility(true);
-
-        // Resetear el scroll al quitar el zoom
-        if (imageContainer) {
-            imageContainer.scrollLeft = 0;
-            imageContainer.scrollTop = 0;
-        }
+    // Centrar en focal (focal.x,focal.y) si se proporciona (coordenadas relativas 0..1)
+    if (imageContainer) {
+      if (focal && scale > 1) {
+        const focalX = focal.x * w;
+        const focalY = focal.y * h;
+        imageContainer.scrollLeft = Math.max(0, focalX - imageContainer.clientWidth / 2);
+        imageContainer.scrollTop  = Math.max(0, focalY - imageContainer.clientHeight / 2);
+      } else {
+        // centrar por defecto
+        imageContainer.scrollLeft = Math.max(0, (w - imageContainer.clientWidth) / 2);
+        imageContainer.scrollTop  = Math.max(0, (h - imageContainer.clientHeight) / 2);
+      }
     }
-}
+  }
 
-// ====================================================
-// 1. Abrir/Cerrar Visor
-// ====================================================
+  function toggleZoomAtPoint(forceZoom = undefined, clientX = null, clientY = null) {
+    const shouldZoom = forceZoom !== undefined ? forceZoom : (currentScale === 1);
+    if (shouldZoom) {
+      // calcular focal: si tenemos coordenadas del touch/click
+      let focal = null;
+      if (clientX !== null && clientY !== null && imageContainer) {
+        const rect = imagenVisor.getBoundingClientRect();
+        const relX = (clientX - rect.left) / rect.width;
+        const relY = (clientY - rect.top) / rect.height;
+        focal = { x: Math.max(0, Math.min(1, relX)), y: Math.max(0, Math.min(1, relY)) };
+      }
+      applyScale(MAX_SCALE, focal);
+    } else {
+      applyScale(1, null);
+      if (imageContainer) {
+        imageContainer.scrollLeft = 0;
+        imageContainer.scrollTop = 0;
+      }
+    }
+  }
 
-// Abrir visor al hacer clic en cualquier imagen del feed
-postImages.forEach(img => {
-    img.addEventListener('click', function() {
-        imagenVisor.src = this.src;
-        imagenVisor.alt = this.alt;
-        descripcionVisor.textContent = this.dataset.description;
+  function getDistance(t1, t2) {
+    const dx = t1.clientX - t2.clientX;
+    const dy = t1.clientY - t2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
 
-        visor.classList.add('active');
-        document.body.style.overflow = 'hidden';
-
-        // Resetear estado al abrir
-        toggleZoom(false); // Asegura que esté en escala 1 al abrir
-        toggleSidebarVisibility(true); // Asegura que la barra lateral sea visible
+  /* -------------------
+     ABRIR/CERRAR VISOR
+  --------------------*/
+  postImages.forEach(img => {
+    // Usamos touchstart+click defensivo para evitar ghost clicks
+    img.addEventListener('click', function (ev) {
+      abrirVisor(this, ev.clientX, ev.clientY);
     });
-});
 
-// Cerrar visor
-function cerrarVisor() {
+    img.addEventListener('touchend', function (ev) {
+      // abrir al soltar toque si no hubo movimiento (simple tap)
+      if (!ev.changedTouches) return;
+      const t = ev.changedTouches[0];
+      if (!touchMoved) abrirVisor(this, t.clientX, t.clientY);
+    }, {passive: true});
+  });
+
+  function abrirVisor(imgElem, clientX = null, clientY = null) {
+    imagenVisor.src = imgElem.src;
+    imagenVisor.alt = imgElem.alt || '';
+    descripcionVisor.textContent = imgElem.dataset.description || '';
+
+    visor.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // cuando carga la imagen guardamos naturales y aplicamos scale 1 fit
+    imagenVisor.onload = () => {
+      naturalW = imagenVisor.naturalWidth;
+      naturalH = imagenVisor.naturalHeight;
+
+      // Ajuste inicial: no exceder el contenedor. Establecemos width/height en natural, pero CSS hará fit si es grande
+      imagenVisor.style.maxWidth = '100%';
+      imagenVisor.style.maxHeight = '95vh';
+      imagenVisor.style.width = 'auto';
+      imagenVisor.style.height = 'auto';
+
+      // Force a scale 1 y luego calcular un fit si la imagen es más grande que el contenedor físico
+      applyScale(1, null);
+    };
+
+    // reset estados
+    currentScale = 1;
+    initialPinchDistance = null;
+  }
+
+  function cerrarVisor() {
     visor.classList.remove('active');
     document.body.style.overflow = 'auto';
-    
-    // Resetear después de la animación
     setTimeout(() => {
-        imagenVisor.src = '';
-        descripcionVisor.textContent = '';
-        toggleZoom(false); // Resetear estado del zoom al cerrar
-    }, 300);
-}
+      imagenVisor.src = '';
+      descripcionVisor.textContent = '';
+      applyScale(1, null);
+    }, 260);
+  }
 
-btnCerrar.addEventListener('click', (e) => {
-    e.stopPropagation(); // Evita el cierre del fondo
+  btnCerrar.addEventListener('click', (e) => {
+    e.stopPropagation();
     cerrarVisor();
-});
+  });
 
-// Cerrar visor al hacer clic fuera de la imagen
-visor.addEventListener('click', function(e) {
-    // Cierra si el clic es directamente en el fondo oscuro o el contenedor
-    if (e.target === visor || e.target.id === 'visorImagenes' || e.target.classList.contains('visor-content')) {
-        cerrarVisor();
+  visor.addEventListener('click', function (e) {
+    // Cierra si hace click en el overlay fuera del contenido
+    if (e.target === visor || e.target.classList.contains('visor-content')) {
+      cerrarVisor();
     }
-});
+  });
 
-// Cerrar con tecla Escape
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && visor.classList.contains('active')) {
-        cerrarVisor();
-    }
-});
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && visor.classList.contains('active')) cerrarVisor();
+  });
 
-// ====================================================
-// 2. Comportamiento de Zoom y Visibilidad (Doble Clic / Un Clic)
-// ====================================================
-
-// 2.1. Toggle Zoom (Doble Clic)
-imagenVisor.addEventListener('dblclick', function(e) {
+  /* -------------------
+     CLICK / TOUCH en la IMAGEN (desktop + mobile)
+  --------------------*/
+  // Desktop double click
+  imagenVisor.addEventListener('dblclick', (e) => {
     e.stopPropagation();
-    toggleZoom();
-});
+    toggleZoomAtPoint(undefined, e.clientX, e.clientY);
+  });
 
-// 2.2. Toggle Descripción (Un Clic)
-imagenVisor.addEventListener('click', function(e) {
+  // Click simple: togglea sidebar o quita zoom
+  imagenVisor.addEventListener('click', (e) => {
     e.stopPropagation();
-    
-    // **CONDICIÓN CLAVE**: Si la imagen NO está en zoom, se alterna la descripción.
-    // Si está en zoom, el clic se ignora, permitiendo la panorámica con el dedo (scroll).
     if (currentScale === 1) {
-        toggleSidebarVisibility(!isDescriptionVisible);
+      toggleSidebarVisibility(!isDescriptionVisible);
     } else {
-        // Si la imagen está en zoom, un solo clic la devuelve al tamaño original (Comportamiento Facebook)
-        toggleZoom(false);
+      toggleZoomAtPoint(false);
     }
-});
+  });
 
+  /* -------------------
+     TOUCH GESTURES: pinch, double-tap, move detection
+  --------------------*/
+  // Evitar pinch-zoom de página nativo cuando hay >1 dedo
+  document.addEventListener('touchstart', function (e) {
+    if (e.touches && e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 
-// ====================================================
-// 3. GESTOS TÁCTILES (PINCH-TO-ZOOM)
-// ====================================================
+  // Touchstart en imagen: detecta posible doble tap y resetea movimiento
+  imagenVisor.addEventListener('touchstart', function (e) {
+    touchMoved = false;
 
-/**
- * Calcula la distancia entre dos puntos táctiles (dos dedos).
- */
-function getDistance(touch1, touch2) {
-    const dx = touch1.clientX - touch2.clientX;
-    const dy = touch1.clientY - touch2.clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-}
-
-// 3.1. Inicio del toque
-imagenVisor.addEventListener('touchstart', handleTouchStart);
-
-function handleTouchStart(e) {
     if (e.touches.length === 2) {
-        // Gesto de PINCH (pellizco) con dos dedos
-        
-        // Prevenir el scroll por defecto y el zoom del navegador
-        e.preventDefault(); 
-        
-        // Ocultar temporalmente la barra lateral durante el pinch
-        toggleSidebarVisibility(false);
+      // iniciar pinch
+      initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+      e.preventDefault();
+    }
 
-        // Almacenar la distancia inicial entre los dos dedos
-        initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
-    } 
-    // Si es un toque con un solo dedo, no hacemos nada inicialmente.
-    // La panorámica (panning) es manejada por el overflow: scroll del contenedor.
+    // double-tap detection
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      const now = Date.now();
+      const dt = now - lastTap.time;
+      const dx = Math.abs(t.clientX - lastTap.x);
+      const dy = Math.abs(t.clientY - lastTap.y);
+      const DIST_THRESH = 30; // px
+      if (dt > 0 && dt <= 300 && dx < DIST_THRESH && dy < DIST_THRESH) {
+        // double tap detected -> toggle zoom centered at this touch
+        e.preventDefault();
+        toggleZoomAtPoint(undefined, t.clientX, t.clientY);
+        lastTap = {time: 0, x: 0, y: 0};
+      } else {
+        lastTap = {time: now, x: t.clientX, y: t.clientY};
+      }
+    }
+  }, { passive: false });
 
-    // Reiniciar el contador de doble toque (para evitar conflicto con dblclick)
-    this.touchCount = (this.touchCount || 0) + 1;
-    setTimeout(() => {
-        this.touchCount = 0;
-    }, 300);
-}
-
-// 3.2. Movimiento del toque
-imagenVisor.addEventListener('touchmove', handleTouchMove);
-
-function handleTouchMove(e) {
+  // track if finger moves (to avoid treating pans as taps)
+  imagenVisor.addEventListener('touchmove', function (e) {
     if (e.touches.length === 2 && initialPinchDistance !== null) {
-        // Movimiento de PINCH (pellizco)
-        e.preventDefault(); // Prevenir el scroll y el zoom nativo
-
-        const currentPinchDistance = getDistance(e.touches[0], e.touches[1]);
-        const scaleFactor = currentPinchDistance / initialPinchDistance;
-
-        // Calcular la nueva escala (limitando el zoom máximo y mínimo)
-        let newScale = Math.min(Math.max(1, currentScale * scaleFactor), MAX_SCALE * 2); 
-
-        // Aplicar la nueva escala
-        imagenVisor.style.transform = `scale(${newScale})`;
-        
-        // Aplicar o quitar la clase is-zoomed si la escala cruza el umbral de 1
-        if (newScale > 1) {
-            imagenVisor.classList.add('is-zoomed');
-        } else {
-            imagenVisor.classList.remove('is-zoomed');
-        }
-
-        // Actualizar la distancia inicial para el siguiente movimiento y evitar saltos
-        initialPinchDistance = currentPinchDistance;
-        currentScale = newScale;
-
-    } else if (e.touches.length === 1 && currentScale > 1) {
-         // Panorámica (Panning) con un solo dedo: ya gestionado por CSS `overflow: scroll`
-         // Por eso, no necesitamos lógica de arrastre compleja aquí.
+      e.preventDefault();
+      const currentDistance = getDistance(e.touches[0], e.touches[1]);
+      const scaleFactor = currentDistance / initialPinchDistance;
+      let newScale = currentScale * scaleFactor;
+      newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE));
+      // focal estimate: midpoint between touches
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      // convert midpoint to relative coords inside image
+      const rect = imagenVisor.getBoundingClientRect();
+      const rel = {
+        x: rect.width ? (midX - rect.left) / rect.width : 0.5,
+        y: rect.height ? (midY - rect.top) / rect.height : 0.5
+      };
+      applyScale(newScale, rel);
+      initialPinchDistance = currentDistance;
+      touchMoved = true;
+    } else if (e.touches.length === 1) {
+      // si hay movimiento de pan, marcamos touchMoved para evitar taps al finalizar
+      const t = e.touches[0];
+      if (!touchStartPos) touchStartPos = {x: t.clientX, y: t.clientY};
+      const dx = Math.abs(t.clientX - touchStartPos.x);
+      const dy = Math.abs(t.clientY - touchStartPos.y);
+      if (dx > 10 || dy > 10) touchMoved = true;
+      // no preventDefault aquí; dejamos que el contenedor haga scroll nativo
     }
-}
+  }, { passive: false });
 
-// 3.3. Fin del toque
-imagenVisor.addEventListener('touchend', handleTouchEnd);
-
-function handleTouchEnd(e) {
-    if (initialPinchDistance !== null) {
-        // El gesto de pinch ha terminado.
-        initialPinchDistance = null;
+  imagenVisor.addEventListener('touchend', function (e) {
+    // final pinch
+    if (initialPinchDistance !== null && (e.touches.length < 2)) {
+      initialPinchDistance = null;
     }
+    // restablecer touchStartPos
+    touchStartPos = null;
 
-    // Si la imagen está en zoom, la descripción permanece oculta.
-    if (currentScale === 1) {
-        toggleSidebarVisibility(true); // Restaurar si se hizo zoom y se volvió a 1x
-    }
+    // si scale quedó por debajo de 1: restaurar
+    if (currentScale < 1.01) applyScale(1, null);
+  }, { passive: false });
 
-    // Detectar Doble Toque Táctil para alternar zoom (Fallback para dblclick)
-    if (this.touchCount === 2) {
-        // Comportamiento de Doble Clic/Doble Toque
-        toggleZoom();
-    }
-}
+  // Evitar click fantasma global: si tocaste y hubo movimiento no dispares clicks
+  // (los handlers de apertura usan touchend con touchMoved)
 });
-
-
-
-
+        
+        
+        
+        
+        
 
 
 
