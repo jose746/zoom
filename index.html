@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor de Imágenes - Estilo Facebook</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
     <style>
         * {
             margin: 0;
@@ -18,52 +19,55 @@
 
         /* Sección principal de la página */
         #page-home {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
+            padding: 0;
+            margin: 0;
+            width: 100%;
         }
 
         /* Título de la página */
         .page-title {
             font-size: 24px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 0;
+            padding: 15px 15px;
             color: #050505;
+            background-color: #fff;
         }
 
         /* Contenedor de la galería de imágenes */
         .gallery-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
         }
 
         /* Cada item de la galería */
         .gallery-item {
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 0;
             overflow: hidden;
             background: #fff;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: none;
+            border-bottom: 1px solid #e4e6eb;
+            transition: background-color 0.2s;
         }
 
         .gallery-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background-color: #f7f8fa;
         }
 
         /* Imagen dentro del item */
         .gallery-item img {
             width: 100%;
-            height: 250px;
+            height: auto;
+            aspect-ratio: 1 / 1;
             object-fit: cover;
             display: block;
         }
 
         /* Descripción debajo de cada imagen en la galería */
         .gallery-item-description {
-            padding: 12px;
+            padding: 12px 15px;
             font-size: 14px;
             color: #050505;
             line-height: 1.4;
@@ -104,7 +108,12 @@
             align-items: center;
             justify-content: center;
             z-index: 10002;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, opacity 0.3s;
+        }
+
+        .visor-close.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .visor-close:hover {
@@ -121,24 +130,31 @@
             justify-content: center;
             touch-action: none;
             cursor: pointer;
+            background-color: #000;
         }
 
         /* Wrapper para la transformación de la imagen */
         .visor-image-wrapper {
-            position: relative;
-            transform-origin: center center;
-            transition: transform 0.3s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Imagen principal del visor */
         .visor-image {
             max-width: 100%;
-            max-height: calc(100vh - 150px);
+            max-height: 100%;
             width: auto;
             height: auto;
             display: block;
             user-select: none;
             -webkit-user-select: none;
+            object-fit: contain;
         }
 
         /* Contenedor de la descripción */
@@ -148,10 +164,11 @@
             padding: 20px;
             max-height: 150px;
             overflow-y: auto;
-            transition: max-height 0.3s ease, padding 0.3s ease;
+            transition: opacity 0.3s, max-height 0.3s ease;
         }
 
         .visor-description-container.hidden {
+            opacity: 0;
             max-height: 0;
             padding: 0 20px;
             overflow: hidden;
@@ -164,51 +181,37 @@
 
         /* Responsive para tablets */
         @media (max-width: 768px) {
-            #page-home {
-                padding: 15px;
+            .page-title {
+                font-size: 20px;
+                padding: 12px 15px;
             }
 
-            .gallery-container {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 10px;
-            }
-
-            .gallery-item img {
-                height: 200px;
-            }
-
-            .visor-image {
-                max-height: calc(100vh - 120px);
+            .gallery-item-description {
+                padding: 10px 15px;
+                font-size: 14px;
             }
 
             .visor-description-container {
                 max-height: 120px;
                 padding: 15px;
             }
+
+            .visor-close {
+                width: 38px;
+                height: 38px;
+                font-size: 22px;
+            }
         }
 
         /* Responsive para móviles */
         @media (max-width: 480px) {
-            #page-home {
-                padding: 10px;
-            }
-
             .page-title {
-                font-size: 20px;
-                margin-bottom: 15px;
-            }
-
-            .gallery-container {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 8px;
-            }
-
-            .gallery-item img {
-                height: 150px;
+                font-size: 18px;
+                padding: 10px 12px;
             }
 
             .gallery-item-description {
-                padding: 10px;
+                padding: 10px 12px;
                 font-size: 13px;
             }
 
@@ -218,10 +221,6 @@
                 font-size: 20px;
                 top: 10px;
                 right: 10px;
-            }
-
-            .visor-image {
-                max-height: calc(100vh - 100px);
             }
 
             .visor-description-container {
@@ -260,6 +259,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/umd/photoswipe.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/umd/photoswipe-lightbox.umd.min.js"></script>
     <script>
         // Datos de ejemplo para las imágenes
         const imageData = [
@@ -299,17 +300,22 @@
         const visorImageContainer = document.getElementById('visorImageContainer');
         const visorImageWrapper = document.getElementById('visorImageWrapper');
 
-        // Variables para el manejo de zoom y gestos
+        // Variables para el manejo de zoom y gestos con PhotoSwipe
         let scale = 1;
-        let lastScale = 1;
         let posX = 0;
         let posY = 0;
-        let lastPosX = 0;
-        let lastPosY = 0;
-        let isDragging = false;
-        let startX = 0;
-        let startY = 0;
         let isDescriptionVisible = true;
+        let currentImageIndex = 0;
+        
+        // Variables para gestos táctiles mejorados
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartDistance = 0;
+        let touchStartScale = 1;
+        let touchStartPosX = 0;
+        let touchStartPosY = 0;
+        let isMultiTouch = false;
+        let isSingleTouchMove = false;
 
         // Generar galería de imágenes
         function generateGallery() {
@@ -330,13 +336,13 @@
         // Abrir el visor con la imagen seleccionada
         function openVisor(index) {
             const item = imageData[index];
+            currentImageIndex = index;
             visorImage.src = item.src;
             visorDescription.textContent = item.description;
             imageVisor.classList.add('active');
             document.body.style.overflow = 'hidden';
             resetZoom();
-            isDescriptionVisible = true;
-            visorDescriptionContainer.classList.remove('hidden');
+            showControls();
         }
 
         // Cerrar el visor
@@ -349,28 +355,39 @@
         // Resetear zoom y posición
         function resetZoom() {
             scale = 1;
-            lastScale = 1;
             posX = 0;
             posY = 0;
-            lastPosX = 0;
-            lastPosY = 0;
             updateTransform();
         }
 
         // Actualizar transformación de la imagen
         function updateTransform() {
             visorImageWrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+            visorImageWrapper.style.transition = isMultiTouch || isSingleTouchMove ? 'none' : 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        }
+
+        // Mostrar controles (descripción y botón X)
+        function showControls() {
+            isDescriptionVisible = true;
+            visorDescriptionContainer.classList.remove('hidden');
+            visorClose.classList.remove('hidden');
+        }
+
+        // Ocultar controles (descripción y botón X)
+        function hideControls() {
+            isDescriptionVisible = false;
+            visorDescriptionContainer.classList.add('hidden');
+            visorClose.classList.add('hidden');
         }
 
         // Toggle de la descripción al hacer clic en la imagen
         visorImageContainer.addEventListener('click', (e) => {
-            // Solo toggle si no estamos haciendo zoom o arrastrando
-            if (scale === 1 && !isDragging) {
-                isDescriptionVisible = !isDescriptionVisible;
+            // Solo toggle si no estamos haciendo zoom
+            if (scale === 1 && !isMultiTouch && !isSingleTouchMove) {
                 if (isDescriptionVisible) {
-                    visorDescriptionContainer.classList.remove('hidden');
+                    hideControls();
                 } else {
-                    visorDescriptionContainer.classList.add('hidden');
+                    showControls();
                 }
             }
         });
@@ -392,74 +409,127 @@
             }
         });
 
-        // Manejo de eventos táctiles para pinch-to-zoom
-        let initialDistance = 0;
-        let touches = [];
-
+        // Manejo de eventos táctiles mejorado para pinch-to-zoom fluido
         visorImageContainer.addEventListener('touchstart', (e) => {
-            touches = Array.from(e.touches);
+            const touches = e.touches;
             
             if (touches.length === 2) {
                 // Inicio del gesto de pinch
                 e.preventDefault();
-                initialDistance = getDistance(touches[0], touches[1]);
-                lastScale = scale;
-            } else if (touches.length === 1 && scale > 1) {
-                // Inicio del arrastre
-                isDragging = true;
-                startX = touches[0].clientX - posX;
-                startY = touches[0].clientY - posY;
+                isMultiTouch = true;
+                isSingleTouchMove = false;
+                
+                touchStartDistance = getDistance(touches[0], touches[1]);
+                touchStartScale = scale;
+                
+                // Calcular el centro del pinch
+                const centerX = (touches[0].clientX + touches[1].clientX) / 2;
+                const centerY = (touches[0].clientY + touches[1].clientY) / 2;
+                
+                touchStartPosX = posX;
+                touchStartPosY = posY;
+                
+            } else if (touches.length === 1) {
+                // Inicio de un toque simple
+                isMultiTouch = false;
+                isSingleTouchMove = false;
+                
+                touchStartX = touches[0].clientX;
+                touchStartY = touches[0].clientY;
+                touchStartPosX = posX;
+                touchStartPosY = posY;
             }
-        });
+        }, { passive: false });
 
         visorImageContainer.addEventListener('touchmove', (e) => {
-            touches = Array.from(e.touches);
+            const touches = e.touches;
             
-            if (touches.length === 2) {
+            if (touches.length === 2 && isMultiTouch) {
                 // Gesto de pinch en progreso
                 e.preventDefault();
-                const currentDistance = getDistance(touches[0], touches[1]);
-                scale = lastScale * (currentDistance / initialDistance);
-                scale = Math.max(1, Math.min(scale, 4)); // Limitar entre 1x y 4x
                 
-                if (scale === 1) {
+                const currentDistance = getDistance(touches[0], touches[1]);
+                const scaleChange = currentDistance / touchStartDistance;
+                
+                scale = touchStartScale * scaleChange;
+                scale = Math.max(1, Math.min(scale, 5)); // Limitar entre 1x y 5x
+                
+                // Calcular el nuevo centro del pinch
+                const centerX = (touches[0].clientX + touches[1].clientX) / 2;
+                const centerY = (touches[0].clientY + touches[1].clientY) / 2;
+                
+                // Si llegamos a escala 1, resetear posición
+                if (scale <= 1.01) {
+                    scale = 1;
                     posX = 0;
                     posY = 0;
                 }
                 
                 updateTransform();
-            } else if (touches.length === 1 && isDragging && scale > 1) {
+                
+            } else if (touches.length === 1 && scale > 1) {
                 // Arrastrar la imagen cuando está con zoom
                 e.preventDefault();
-                posX = touches[0].clientX - startX;
-                posY = touches[0].clientY - startY;
+                isSingleTouchMove = true;
+                
+                const deltaX = touches[0].clientX - touchStartX;
+                const deltaY = touches[0].clientY - touchStartY;
+                
+                posX = touchStartPosX + deltaX;
+                posY = touchStartPosY + deltaY;
+                
+                // Limitar el arrastre para que no se salga demasiado
+                const maxOffset = 200;
+                posX = Math.max(-maxOffset * scale, Math.min(maxOffset * scale, posX));
+                posY = Math.max(-maxOffset * scale, Math.min(maxOffset * scale, posY));
+                
                 updateTransform();
             }
-        });
+        }, { passive: false });
 
         visorImageContainer.addEventListener('touchend', (e) => {
-            if (e.touches.length < 2) {
-                initialDistance = 0;
-            }
             if (e.touches.length === 0) {
-                isDragging = false;
+                // Resetear flags después de un pequeño delay
+                setTimeout(() => {
+                    isMultiTouch = false;
+                    isSingleTouchMove = false;
+                }, 100);
+                
+                // Si la escala es muy cercana a 1, resetear completamente
+                if (scale < 1.1) {
+                    scale = 1;
+                    posX = 0;
+                    posY = 0;
+                    updateTransform();
+                }
             }
         });
 
         // Soporte para zoom con rueda del mouse (desktop)
         visorImageContainer.addEventListener('wheel', (e) => {
             e.preventDefault();
-            const delta = e.deltaY * -0.01;
-            scale += delta;
-            scale = Math.max(1, Math.min(scale, 4));
             
-            if (scale === 1) {
+            const delta = e.deltaY * -0.005;
+            const rect = visorImageContainer.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            const oldScale = scale;
+            scale += delta;
+            scale = Math.max(1, Math.min(5, scale));
+            
+            if (scale > 1) {
+                // Ajustar posición basándose en la posición del mouse
+                const scaleChange = scale / oldScale;
+                posX = mouseX - (mouseX - posX) * scaleChange;
+                posY = mouseY - (mouseY - posY) * scaleChange;
+            } else {
                 posX = 0;
                 posY = 0;
             }
             
             updateTransform();
-        });
+        }, { passive: false });
 
         // Función auxiliar para calcular distancia entre dos puntos táctiles
         function getDistance(touch1, touch2) {
