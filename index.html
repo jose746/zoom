@@ -2,9 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>evolucion
-    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Visor de Imágenes - Estilo Facebook</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
     <style>
         * {
@@ -425,7 +426,7 @@
         // Toggle de controles con detección de clic simple (solo desktop)
         visorImageContainer.addEventListener('click', (e) => {
             // Solo funciona en desktop (no en touch)
-            if (e.pointerType === 'mouse' || !('ontouchstart' in window)) {
+            if (e.pointerType === 'mouse' || (!('ontouchstart' in window) && e.type === 'click')) {
                 const currentTime = new Date().getTime();
                 const timeSinceLastTap = currentTime - lastTapTime;
                 
@@ -446,8 +447,22 @@
                     if (scale === 1 && !isMultiTouch && !isSingleTouchMove) {
                         toggleControls();
                     }
+                    lastTapTime = 0;
                 }, 300);
             }
+        });
+        
+        // Prevenir el comportamiento por defecto de iOS que causa zoom
+        visorImageContainer.addEventListener('gesturestart', (e) => {
+            e.preventDefault();
+        });
+        
+        visorImageContainer.addEventListener('gesturechange', (e) => {
+            e.preventDefault();
+        });
+        
+        visorImageContainer.addEventListener('gestureend', (e) => {
+            e.preventDefault();
         });
         
         // Función para alternar controles
@@ -535,7 +550,17 @@
 
         visorImageContainer.addEventListener('touchmove', (e) => {
             const touches = e.touches;
-            hasMoved = true;
+            
+            // Detectar si hubo movimiento significativo (más de 10px)
+            if (touches.length === 1 && !isMultiTouch) {
+                const deltaX = Math.abs(touches[0].clientX - touchStartX);
+                const deltaY = Math.abs(touches[0].clientY - touchStartY);
+                if (deltaX > 10 || deltaY > 10) {
+                    hasMoved = true;
+                }
+            } else {
+                hasMoved = true;
+            }
             
             if (touches.length === 2 && isMultiTouch) {
                 // Gesto de pinch en progreso
@@ -577,14 +602,20 @@
         }, { passive: false });
 
         visorImageContainer.addEventListener('touchend', (e) => {
-            // Si no se movió y es un tap simple
-            if (!hasMoved && e.touches.length === 0 && !isMultiTouch) {
+            const wasMultiTouch = isMultiTouch;
+            const wasSingleTouchMove = isSingleTouchMove;
+            
+            // Si no se movió y es un tap simple (no fue pinch ni arrastre)
+            if (!hasMoved && e.touches.length === 0 && !wasMultiTouch && !wasSingleTouchMove) {
+                e.preventDefault();
+                e.stopPropagation();
+                
                 const currentTime = new Date().getTime();
                 const timeSinceLastTap = currentTime - lastTapTime;
                 
-                // Detectar doble tap
-                if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-                    e.preventDefault();
+                // Detectar doble tap (menos de 400ms para iOS)
+                if (timeSinceLastTap < 400 && timeSinceLastTap > 50 && lastTapTime > 0) {
+                    // Doble tap detectado
                     clearTimeout(tapTimeout);
                     
                     const touch = e.changedTouches[0];
@@ -598,11 +629,13 @@
                     lastTapTime = currentTime;
                     clearTimeout(tapTimeout);
                     
+                    // Timeout más largo para iOS (350ms)
                     tapTimeout = setTimeout(() => {
                         if (scale === 1) {
                             toggleControls();
                         }
-                    }, 300);
+                        lastTapTime = 0;
+                    }, 350);
                 }
             }
             
@@ -612,17 +645,17 @@
                     isMultiTouch = false;
                     isSingleTouchMove = false;
                     hasMoved = false;
-                }, 100);
+                }, 150);
                 
                 // Si la escala es muy cercana a 1, resetear completamente
-                if (scale < 1.1) {
+                if (scale < 1.1 && scale !== 1) {
                     scale = 1;
                     posX = 0;
                     posY = 0;
                     updateTransform();
                 }
             }
-        });
+        }, { passive: false });
 
         // Soporte para zoom con rueda del mouse (desktop)
         visorImageContainer.addEventListener('wheel', (e) => {
