@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor de Imágenes - Estilo Facebook</title>
+    <title>evolucion
+    </title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
     <style>
         * {
@@ -39,6 +40,23 @@
             display: flex;
             flex-direction: column;
             gap: 0;
+        }
+
+        /* Responsive para escritorio - dos columnas */
+        @media (min-width: 769px) {
+            .gallery-container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0;
+            }
+
+            .gallery-item {
+                border-right: 1px solid #e4e6eb;
+            }
+
+            .gallery-item:nth-child(2n) {
+                border-right: none;
+            }
         }
 
         /* Cada item de la galería */
@@ -108,7 +126,8 @@
             align-items: center;
             justify-content: center;
             z-index: 10002;
-            transition: background-color 0.2s, opacity 0.3s;
+            transition: background-color 0.2s, opacity 0.25s ease-out;
+            will-change: opacity;
         }
 
         .visor-close.hidden {
@@ -131,6 +150,12 @@
             touch-action: none;
             cursor: pointer;
             background-color: #000;
+            /* Altura fija para evitar que cambie al ocultar descripción */
+            height: 100vh;
+        }
+
+        .image-visor.active .visor-image-container {
+            height: calc(100vh - 150px);
         }
 
         /* Wrapper para la transformación de la imagen */
@@ -159,19 +184,23 @@
 
         /* Contenedor de la descripción */
         .visor-description-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             background-color: #242526;
             color: #e4e6eb;
             padding: 20px;
             max-height: 150px;
             overflow-y: auto;
-            transition: opacity 0.3s, max-height 0.3s ease;
+            transition: transform 0.25s ease-out;
+            transform: translateY(0);
+            z-index: 10001;
+            will-change: transform;
         }
 
         .visor-description-container.hidden {
-            opacity: 0;
-            max-height: 0;
-            padding: 0 20px;
-            overflow: hidden;
+            transform: translateY(100%);
         }
 
         .visor-description {
@@ -200,6 +229,10 @@
                 width: 38px;
                 height: 38px;
                 font-size: 22px;
+            }
+
+            .image-visor.active .visor-image-container {
+                height: calc(100vh - 120px);
             }
         }
 
@@ -230,6 +263,10 @@
 
             .visor-description {
                 font-size: 14px;
+            }
+
+            .image-visor.active .visor-image-container {
+                height: calc(100vh - 100px);
             }
         }
     </style>
@@ -316,6 +353,11 @@
         let touchStartPosY = 0;
         let isMultiTouch = false;
         let isSingleTouchMove = false;
+        let hasMoved = false;
+        
+        // Variables para detección de clics y doble clic
+        let lastTapTime = 0;
+        let tapTimeout = null;
 
         // Generar galería de imágenes
         function generateGallery() {
@@ -363,7 +405,7 @@
         // Actualizar transformación de la imagen
         function updateTransform() {
             visorImageWrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
-            visorImageWrapper.style.transition = isMultiTouch || isSingleTouchMove ? 'none' : 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            visorImageWrapper.style.transition = (isMultiTouch || isSingleTouchMove) ? 'none' : 'transform 0.25s ease-out';
         }
 
         // Mostrar controles (descripción y botón X)
@@ -380,17 +422,69 @@
             visorClose.classList.add('hidden');
         }
 
-        // Toggle de la descripción al hacer clic en la imagen
+        // Toggle de controles con detección de clic simple (solo desktop)
         visorImageContainer.addEventListener('click', (e) => {
-            // Solo toggle si no estamos haciendo zoom
-            if (scale === 1 && !isMultiTouch && !isSingleTouchMove) {
-                if (isDescriptionVisible) {
-                    hideControls();
-                } else {
-                    showControls();
+            // Solo funciona en desktop (no en touch)
+            if (e.pointerType === 'mouse' || !('ontouchstart' in window)) {
+                const currentTime = new Date().getTime();
+                const timeSinceLastTap = currentTime - lastTapTime;
+                
+                // Detectar doble clic
+                if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+                    e.preventDefault();
+                    clearTimeout(tapTimeout);
+                    handleDoubleClick(e);
+                    lastTapTime = 0;
+                    return;
                 }
+                
+                // Clic simple - esperar para ver si viene otro
+                lastTapTime = currentTime;
+                clearTimeout(tapTimeout);
+                
+                tapTimeout = setTimeout(() => {
+                    if (scale === 1 && !isMultiTouch && !isSingleTouchMove) {
+                        toggleControls();
+                    }
+                }, 300);
             }
         });
+        
+        // Función para alternar controles
+        function toggleControls() {
+            if (isDescriptionVisible) {
+                hideControls();
+            } else {
+                showControls();
+            }
+        }
+        
+        // Función para manejar doble clic
+        function handleDoubleClick(e) {
+            if (scale === 1) {
+                // Hacer zoom in al 2.5x
+                const rect = visorImageContainer.getBoundingClientRect();
+                const clickX = e.clientX || e.touches?.[0]?.clientX || rect.width / 2;
+                const clickY = e.clientY || e.touches?.[0]?.clientY || rect.height / 2;
+                
+                scale = 2.5;
+                
+                // Centrar el zoom en el punto del clic
+                const offsetX = (rect.width / 2 - clickX) * (scale - 1);
+                const offsetY = (rect.height / 2 - clickY) * (scale - 1);
+                
+                posX = offsetX;
+                posY = offsetY;
+                
+                updateTransform();
+            } else {
+                // Volver al tamaño original
+                scale = 1;
+                posX = 0;
+                posY = 0;
+                updateTransform();
+            }
+        }
 
         // Evento para cerrar el visor
         visorClose.addEventListener('click', closeVisor);
@@ -412,19 +506,17 @@
         // Manejo de eventos táctiles mejorado para pinch-to-zoom fluido
         visorImageContainer.addEventListener('touchstart', (e) => {
             const touches = e.touches;
+            hasMoved = false;
             
             if (touches.length === 2) {
                 // Inicio del gesto de pinch
                 e.preventDefault();
                 isMultiTouch = true;
                 isSingleTouchMove = false;
+                clearTimeout(tapTimeout);
                 
                 touchStartDistance = getDistance(touches[0], touches[1]);
                 touchStartScale = scale;
-                
-                // Calcular el centro del pinch
-                const centerX = (touches[0].clientX + touches[1].clientX) / 2;
-                const centerY = (touches[0].clientY + touches[1].clientY) / 2;
                 
                 touchStartPosX = posX;
                 touchStartPosY = posY;
@@ -443,6 +535,7 @@
 
         visorImageContainer.addEventListener('touchmove', (e) => {
             const touches = e.touches;
+            hasMoved = true;
             
             if (touches.length === 2 && isMultiTouch) {
                 // Gesto de pinch en progreso
@@ -453,10 +546,6 @@
                 
                 scale = touchStartScale * scaleChange;
                 scale = Math.max(1, Math.min(scale, 5)); // Limitar entre 1x y 5x
-                
-                // Calcular el nuevo centro del pinch
-                const centerX = (touches[0].clientX + touches[1].clientX) / 2;
-                const centerY = (touches[0].clientY + touches[1].clientY) / 2;
                 
                 // Si llegamos a escala 1, resetear posición
                 if (scale <= 1.01) {
@@ -488,11 +577,41 @@
         }, { passive: false });
 
         visorImageContainer.addEventListener('touchend', (e) => {
+            // Si no se movió y es un tap simple
+            if (!hasMoved && e.touches.length === 0 && !isMultiTouch) {
+                const currentTime = new Date().getTime();
+                const timeSinceLastTap = currentTime - lastTapTime;
+                
+                // Detectar doble tap
+                if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+                    e.preventDefault();
+                    clearTimeout(tapTimeout);
+                    
+                    const touch = e.changedTouches[0];
+                    handleDoubleClick({ 
+                        clientX: touch.clientX, 
+                        clientY: touch.clientY 
+                    });
+                    lastTapTime = 0;
+                } else {
+                    // Tap simple - esperar para ver si viene otro
+                    lastTapTime = currentTime;
+                    clearTimeout(tapTimeout);
+                    
+                    tapTimeout = setTimeout(() => {
+                        if (scale === 1) {
+                            toggleControls();
+                        }
+                    }, 300);
+                }
+            }
+            
+            // Resetear flags después de un pequeño delay
             if (e.touches.length === 0) {
-                // Resetear flags después de un pequeño delay
                 setTimeout(() => {
                     isMultiTouch = false;
                     isSingleTouchMove = false;
+                    hasMoved = false;
                 }, 100);
                 
                 // Si la escala es muy cercana a 1, resetear completamente
