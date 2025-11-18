@@ -1,93 +1,475 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Galería con PhotoSwipe</title>
-  
-  <!-- PhotoSwipe CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
-  
-  <style>
-    .galeria img {
-      width: 100%;
-      height: auto;
-      display: block;
-      cursor: zoom-in;
-    }
-    .galeria {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 10px;
-      padding: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Imágenes - Estilo Facebook</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        /* Sección principal de la página */
+        #page-home {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Título de la página */
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #050505;
+        }
+
+        /* Contenedor de la galería de imágenes */
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        /* Cada item de la galería */
+        .gallery-item {
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Imagen dentro del item */
+        .gallery-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Descripción debajo de cada imagen en la galería */
+        .gallery-item-description {
+            padding: 12px;
+            font-size: 14px;
+            color: #050505;
+            line-height: 1.4;
+        }
+
+        /* Visor modal (fondo oscuro) */
+        .image-visor {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .image-visor.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Botón de cerrar (X) */
+        .visor-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(68, 73, 80, 0.8);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10002;
+            transition: background-color 0.2s;
+        }
+
+        .visor-close:hover {
+            background-color: rgba(68, 73, 80, 1);
+        }
+
+        /* Contenedor de la imagen con zoom */
+        .visor-image-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+            cursor: pointer;
+        }
+
+        /* Wrapper para la transformación de la imagen */
+        .visor-image-wrapper {
+            position: relative;
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+        }
+
+        /* Imagen principal del visor */
+        .visor-image {
+            max-width: 100%;
+            max-height: calc(100vh - 150px);
+            width: auto;
+            height: auto;
+            display: block;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Contenedor de la descripción */
+        .visor-description-container {
+            background-color: #242526;
+            color: #e4e6eb;
+            padding: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .visor-description-container.hidden {
+            max-height: 0;
+            padding: 0 20px;
+            overflow: hidden;
+        }
+
+        .visor-description {
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* Responsive para tablets */
+        @media (max-width: 768px) {
+            #page-home {
+                padding: 15px;
+            }
+
+            .gallery-container {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 10px;
+            }
+
+            .gallery-item img {
+                height: 200px;
+            }
+
+            .visor-image {
+                max-height: calc(100vh - 120px);
+            }
+
+            .visor-description-container {
+                max-height: 120px;
+                padding: 15px;
+            }
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 480px) {
+            #page-home {
+                padding: 10px;
+            }
+
+            .page-title {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+
+            .gallery-container {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 8px;
+            }
+
+            .gallery-item img {
+                height: 150px;
+            }
+
+            .gallery-item-description {
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .visor-close {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+                top: 10px;
+                right: 10px;
+            }
+
+            .visor-image {
+                max-height: calc(100vh - 100px);
+            }
+
+            .visor-description-container {
+                max-height: 100px;
+                padding: 12px;
+            }
+
+            .visor-description {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="galeria" id="mi-galeria">
-  <!-- Cada imagen debe tener: 
-       - href = imagen grande
-       - data-pswp-width y data-pswp-height = dimensiones reales
-       - <img> = thumbnail -->
-  <a href="https://picsum.photos/1200/800?random=1"
-     data-pswp-width="1200"
-     data-pswp-height="800">
-    <img src="https://picsum.photos/300/200?random=1" alt="Imagen 1">
-  </a>
-
-  <a href="https://picsum.photos/800/1200?random=2"
-     data-pswp-width="800"
-     data-pswp-height="1200">
-    <img src="https://picsum.photos/200/300?random=2" alt="Imagen 2">
-  </a>
-
-  <!-- Agrega más imágenes aquí -->
-</div>
-
-<!-- PhotoSwipe Root (no tocar) -->
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="pswp__bg"></div>
-  <div class="pswp__scroll-wrap">
-    <div class="pswp__container">
-      <div class="pswp__item"></div>
-      <div class="pswp__item"></div>
-      <div class="pswp__item"></div>
+    <!-- Página principal con galería de imágenes -->
+    <div id="page-home" class="page-section">
+        <h1 class="page-title">Mis Fotos</h1>
+        
+        <div class="gallery-container" id="galleryContainer">
+            <!-- Las imágenes se generarán dinámicamente con JavaScript -->
+        </div>
     </div>
-    <div class="pswp__ui pswp__ui--hidden">
-      <div class="pswp__top-bar">
-        <button class="pswp__button pswp__button--close" title="Cerrar"></button>
-        <button class="pswp__button pswp__button--fs" title="Pantalla completa"></button>
-        <button class="pswp__button pswp__button--zoom" title="Zoom"></button>
-        <div class="pswp__preloader"></div>
-      </div>
-      <div class="pswp__share-modal pswp__share-modal--hidden"></div>
-      <button class="pswp__button pswp__button--arrow--left" title="Anterior"></button>
-      <button class="pswp__button pswp__button--arrow--right" title="Siguiente"></button>
-      <div class="pswp__caption"></div>
+
+    <!-- Visor de imágenes modal -->
+    <div class="image-visor" id="imageVisor">
+        <button class="visor-close" id="visorClose" aria-label="Cerrar">&times;</button>
+        
+        <div class="visor-image-container" id="visorImageContainer">
+            <div class="visor-image-wrapper" id="visorImageWrapper">
+                <img src="" alt="" class="visor-image" id="visorImage">
+            </div>
+        </div>
+        
+        <div class="visor-description-container" id="visorDescriptionContainer">
+            <p class="visor-description" id="visorDescription"></p>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- PhotoSwipe JS (al final) -->
-<script type="module">
-  import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js';
+    <script>
+        // Datos de ejemplo para las imágenes
+        const imageData = [
+            {
+                src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
+                description: 'Hermoso paisaje de montañas al atardecer con cielo despejado y nubes rosadas.'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800',
+                description: 'Naturaleza en su máximo esplendor, bosque verde con árboles altos.'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800',
+                description: 'Playa paradisíaca con arena blanca y agua cristalina color turquesa.'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=800',
+                description: 'Atardecer en el campo con flores silvestres y cielo naranja.'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800',
+                description: 'Lago tranquilo rodeado de montañas con reflejo perfecto en el agua.'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',
+                description: 'Sendero en el bosque con luz del sol filtrándose entre los árboles.'
+            }
+        ];
 
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: '#mi-galeria',
-    children: 'a',
-    pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.min.js'),
-    
-    // Opcional: mejorar experiencia
-    showHideAnimationType: 'zoom', // animación suave
-    loop: true,
-    wheelToZoom: true, // zoom con rueda en desktop
-    pinchToClose: false, // evita cerrar al pellizcar
-    paddingFn: () => ({ top: 20, bottom: 20, left: 20, right: 20 })
-  });
+        // Referencias a elementos del DOM
+        const galleryContainer = document.getElementById('galleryContainer');
+        const imageVisor = document.getElementById('imageVisor');
+        const visorClose = document.getElementById('visorClose');
+        const visorImage = document.getElementById('visorImage');
+        const visorDescription = document.getElementById('visorDescription');
+        const visorDescriptionContainer = document.getElementById('visorDescriptionContainer');
+        const visorImageContainer = document.getElementById('visorImageContainer');
+        const visorImageWrapper = document.getElementById('visorImageWrapper');
 
-  lightbox.init();
-</script>
+        // Variables para el manejo de zoom y gestos
+        let scale = 1;
+        let lastScale = 1;
+        let posX = 0;
+        let posY = 0;
+        let lastPosX = 0;
+        let lastPosY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let isDescriptionVisible = true;
 
+        // Generar galería de imágenes
+        function generateGallery() {
+            imageData.forEach((item, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.innerHTML = `
+                    <img src="${item.src}" alt="Imagen ${index + 1}">
+                    <div class="gallery-item-description">${item.description}</div>
+                `;
+                
+                // Evento para abrir el visor al hacer clic
+                galleryItem.addEventListener('click', () => openVisor(index));
+                galleryContainer.appendChild(galleryItem);
+            });
+        }
+
+        // Abrir el visor con la imagen seleccionada
+        function openVisor(index) {
+            const item = imageData[index];
+            visorImage.src = item.src;
+            visorDescription.textContent = item.description;
+            imageVisor.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            resetZoom();
+            isDescriptionVisible = true;
+            visorDescriptionContainer.classList.remove('hidden');
+        }
+
+        // Cerrar el visor
+        function closeVisor() {
+            imageVisor.classList.remove('active');
+            document.body.style.overflow = '';
+            resetZoom();
+        }
+
+        // Resetear zoom y posición
+        function resetZoom() {
+            scale = 1;
+            lastScale = 1;
+            posX = 0;
+            posY = 0;
+            lastPosX = 0;
+            lastPosY = 0;
+            updateTransform();
+        }
+
+        // Actualizar transformación de la imagen
+        function updateTransform() {
+            visorImageWrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        }
+
+        // Toggle de la descripción al hacer clic en la imagen
+        visorImageContainer.addEventListener('click', (e) => {
+            // Solo toggle si no estamos haciendo zoom o arrastrando
+            if (scale === 1 && !isDragging) {
+                isDescriptionVisible = !isDescriptionVisible;
+                if (isDescriptionVisible) {
+                    visorDescriptionContainer.classList.remove('hidden');
+                } else {
+                    visorDescriptionContainer.classList.add('hidden');
+                }
+            }
+        });
+
+        // Evento para cerrar el visor
+        visorClose.addEventListener('click', closeVisor);
+
+        // Cerrar al hacer clic en el fondo (solo si no hay zoom)
+        imageVisor.addEventListener('click', (e) => {
+            if (e.target === imageVisor && scale === 1) {
+                closeVisor();
+            }
+        });
+
+        // Cerrar con la tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && imageVisor.classList.contains('active')) {
+                closeVisor();
+            }
+        });
+
+        // Manejo de eventos táctiles para pinch-to-zoom
+        let initialDistance = 0;
+        let touches = [];
+
+        visorImageContainer.addEventListener('touchstart', (e) => {
+            touches = Array.from(e.touches);
+            
+            if (touches.length === 2) {
+                // Inicio del gesto de pinch
+                e.preventDefault();
+                initialDistance = getDistance(touches[0], touches[1]);
+                lastScale = scale;
+            } else if (touches.length === 1 && scale > 1) {
+                // Inicio del arrastre
+                isDragging = true;
+                startX = touches[0].clientX - posX;
+                startY = touches[0].clientY - posY;
+            }
+        });
+
+        visorImageContainer.addEventListener('touchmove', (e) => {
+            touches = Array.from(e.touches);
+            
+            if (touches.length === 2) {
+                // Gesto de pinch en progreso
+                e.preventDefault();
+                const currentDistance = getDistance(touches[0], touches[1]);
+                scale = lastScale * (currentDistance / initialDistance);
+                scale = Math.max(1, Math.min(scale, 4)); // Limitar entre 1x y 4x
+                
+                if (scale === 1) {
+                    posX = 0;
+                    posY = 0;
+                }
+                
+                updateTransform();
+            } else if (touches.length === 1 && isDragging && scale > 1) {
+                // Arrastrar la imagen cuando está con zoom
+                e.preventDefault();
+                posX = touches[0].clientX - startX;
+                posY = touches[0].clientY - startY;
+                updateTransform();
+            }
+        });
+
+        visorImageContainer.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                initialDistance = 0;
+            }
+            if (e.touches.length === 0) {
+                isDragging = false;
+            }
+        });
+
+        // Soporte para zoom con rueda del mouse (desktop)
+        visorImageContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY * -0.01;
+            scale += delta;
+            scale = Math.max(1, Math.min(scale, 4));
+            
+            if (scale === 1) {
+                posX = 0;
+                posY = 0;
+            }
+            
+            updateTransform();
+        });
+
+        // Función auxiliar para calcular distancia entre dos puntos táctiles
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // Inicializar la galería al cargar la página
+        generateGallery();
+    </script>
 </body>
 </html>
