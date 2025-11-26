@@ -7,301 +7,545 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Visor de Imágenes - Estilo Facebook</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-        }
 
-        /* Sección principal de la página */
-        #page-home {
-            padding: 0;
-            margin: 0;
-            width: 100%;
-        }
+  <!-- Reset y estilos desde CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css/normalize.css">
 
-        /* Título de la página */
-        .page-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 0;
-            padding: 15px 15px;
-            color: #050505;
-            background-color: #fff;
-        }
+  <!-- Bootstrap desde CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 
-        /* Contenedor de la galería de imágenes */
-        .gallery-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-        }
+  <!-- Animate.css desde CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
 
-        /* Responsive para escritorio - dos columnas */
-        @media (min-width: 769px) {
-            .gallery-container {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0;
-            }
+  <!-- Google Fonts desde CDN -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap">
 
-            .gallery-item {
-                border-right: 1px solid #e4e6eb;
-            }
+  <title>Warp Speed Final</title>
+  <style>
+ * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-            .gallery-item:nth-child(2n) {
-                border-right: none;
-            }
-        }
+/* Configuración de body y html */
+html, body {
+  height: 100%;
+  /* Eliminamos 'overflow: hidden' del body/html para permitir el scroll en #main */
+  overflow-x: hidden; /* Evita el scroll horizontal */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #000000; /* usa solo un color de fondo */
+}
 
-        /* Cada item de la galería */
-        .gallery-item {
-            cursor: pointer;
-            border-radius: 0;
-            overflow: hidden;
-            background: #fff;
-            box-shadow: none;
-            border-bottom: 1px solid #e4e6eb;
-            transition: background-color 0.2s;
-        }
+/* --- INTRO Y LOGO --- */
 
-        .gallery-item:hover {
-            background-color: #f7f8fa;
-        }
+#intro {
+  position:fixed; inset:0; background:#000000; z-index:9999;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  transition: opacity 1.4s ease; /* misma transición para TODO el intro */
+}
+canvas { position:absolute; top:0; left:0; width:100%; height:100%; }
 
-        /* Imagen dentro del item */
-        .gallery-item img {
-            width: 100%;
-            height: auto;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            display: block;
-        }
+#logo {
+ background-color: rgba(0, 0, 0, 0);
+  opacity:0; max-width:82vw; max-height:52vh;
+  transform:scale(0.4);
+  transition: opacity 1.4s ease-in-out, transform 0.4s cubic-bezier(0.2,1,0.3,1);
+  filter: drop-shadow(0 0 70px rgb(0, 0, 0));
+  animation: aparecerLogo 2.3s ease-out forwards;
+}
 
-        /* Descripción debajo de cada imagen en la galería */
-        .gallery-item-description {
-            padding: 12px 15px;
-            font-size: 14px;
-            color: #050505;
-            line-height: 1.4;
-        }
+@keyframes aparecerLogo {
+  0% { opacity: 0; transform: scale(0.5); }
+  30% { opacity: 1; transform: scale(1); }
+  70% { transform: scale(2.1); }
+  100% { transform: scale(2); }
+}
 
-        /* Visor modal (fondo oscuro) */
-        .image-visor {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            z-index: 9999;
-            overflow: hidden;
-        }
+#logo.show {
+  transition: opacity 1.4s ease-in-out;
+   opacity:1; transform:scale(2.2);
+}
 
-        .image-visor.active {
-            display: flex;
-            flex-direction: column;
-        }
+/* --- TEXTO DEL INTRO --- */
 
-        /* Botón de cerrar (X) */
-        .visor-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 40px;
-            height: 40px;
-            background-color: rgba(68, 73, 80, 0.8);
-            border: none;
-            border-radius: 50%;
-            color: #fff;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10002;
-            transition: background-color 0.2s, opacity 0.25s ease-out;
-            will-change: opacity;
-        }
+#text {
+  margin-top: 10vh;
+  /* Usamos clamp para hacer el tamaño de fuente responsive */
+  font: 900 clamp(3.2rem, 13vw, 9rem)/1 'Montserrat', sans-serif;
+  color: rgb(224, 224, 224);
+  text-shadow: 0 0 40px rgb(0, 132, 255), 0 0 90px rgb(0, 0, 0);
+  letter-spacing: 9px;
+  opacity: 0;
+  text-align: center;
+  padding: 0 15px;
+  display: inline-block;
+  transform-origin: bottom;
+}
 
-        .visor-close.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+/* Ajustes de responsive para el texto del intro */
+@media (max-width: 768px) {
+  #text {
+    margin-top: 5vh; /* Menos margen superior en móviles/tablets */
+    letter-spacing: 5px;
+  }
+}
 
-        .visor-close:hover {
-            background-color: rgba(68, 73, 80, 1);
-        }
+@keyframes aparecerTexto {
+  0% { opacity: 0; transform: scaleY(1); }
+  30% { opacity: 1; transform: scaleY(2); }
+  70% { transform: scaleY(4); }
+  100% { transform: scaleY(9); }
+}
 
-        /* Contenedor de la imagen con zoom */
-        .visor-image-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: none;
-            cursor: pointer;
-            background-color: #000;
-            /* Altura fija para evitar que cambie al ocultar descripción */
-            height: 100vh;
-        }
+#text.show {
+  opacity:1;
+  animation: aparecerTexto 2.5s ease-out forwards;
+}
 
-        .image-visor.active .visor-image-container {
-            height: calc(100vh - 150px);
-        }
+/* --- CONTENIDO PRINCIPAL (#main) --- */
 
-        /* Wrapper para la transformación de la imagen */
-        .visor-image-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+#main {
+  /* Habilitamos el scroll vertical en el contenedor principal */
+  opacity:0; transition:opacity 1.2s ease;
+  min-height:100vh;
+  /* El overflow: auto permite el scroll si el contenido excede la altura */
+  overflow-y: auto;
+  overflow-x: hidden;
+  background:#bcbcbc;
+  color:white; padding:80px 0; /* Ajuste para que el padding no cause problemas con el scroll */
+  text-align:center;
+}
 
-        /* Imagen principal del visor */
-        .visor-image {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            display: block;
-            user-select: none;
-            -webkit-user-select: none;
-            object-fit: contain;
-        }
+/* Sección principal de la página */
+#page-home {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
 
-        /* Contenedor de la descripción */
-        .visor-description-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: #242526;
-            color: #e4e6eb;
-            padding: 20px;
-            max-height: 150px;
-            overflow-y: auto;
-            transition: transform 0.25s ease-out;
-            transform: translateY(0);
-            z-index: 10001;
-            will-change: transform;
-        }
+/* Título de la página */
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 0;
+    padding: 15px 15px;
+    color: #050505;
+    background-color: #000000;
+    text-align: left; /* Alineación a la izquierda */
+}
 
-        .visor-description-container.hidden {
-            transform: translateY(100%);
-        }
+/* Contenedor de la galería de imágenes */
+.gallery-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
 
-        .visor-description {
-            font-size: 15px;
-            line-height: 1.5;
-        }
+/* Cada item de la galería */
+.gallery-item {
+    cursor: pointer;
+    border-radius: 0;
+    overflow: hidden;
+    background: #000000;
+    box-shadow: none;
+    border-bottom: 1px solid #e4e6eb;
+    transition: background-color 0.2s;
+}
 
-        /* Responsive para tablets */
-        @media (max-width: 768px) {
-            .page-title {
-                font-size: 20px;
-                padding: 12px 15px;
-            }
+.gallery-item:hover {
+    background-color: #f7f8fa;
+}
 
-            .gallery-item-description {
-                padding: 10px 15px;
-                font-size: 14px;
-            }
+/* Imagen dentro del item */
+.gallery-item img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+}
 
-            .visor-description-container {
-                max-height: 120px;
-                padding: 15px;
-            }
+/* Descripción debajo de cada imagen en la galería */
+.gallery-item-description {
+    padding: 12px 15px;
+    font-size: 14px;
+    color: #ffffff;
+    line-height: 1.4;
+    text-align: left;
+}
 
-            .visor-close {
-                width: 38px;
-                height: 38px;
-                font-size: 22px;
-            }
+/* --- MEDIA QUERIES (RESPONSIVE) --- */
 
-            .image-visor.active .visor-image-container {
-                height: calc(100vh - 120px);
-            }
-        }
+/* 💻 Escritorio / Pantallas grandes (más de 1200px) */
+@media (min-width: 1201px) {
+    .gallery-container {
+        grid-template-columns: repeat(3, 1fr); /* 3 columnas en escritorio grande */
+    }
 
-        /* Responsive para móviles */
-        @media (max-width: 480px) {
-            .page-title {
-                font-size: 18px;
-                padding: 10px 12px;
-            }
+    .gallery-item:nth-child(2n) {
+        border-right: 1px solid #e4e6eb; /* Restaurar borde derecho para la segunda columna */
+    }
 
-            .gallery-item-description {
-                padding: 10px 12px;
-                font-size: 13px;
-            }
+    .gallery-item:nth-child(3n) {
+        border-right: none; /* Sin borde derecho en la tercera columna */
+    }
 
-            .visor-close {
-                width: 36px;
-                height: 36px;
-                font-size: 20px;
-                top: 10px;
-                right: 10px;
-            }
+    .page-title {
+        font-size: 28px;
+        padding: 20px 30px;
+    }
+}
 
-            .visor-description-container {
-                max-height: 100px;
-                padding: 12px;
-            }
+/* 🖥️ Escritorio / Tablets horizontales (769px a 1200px) */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .gallery-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+        gap: 0;
+    }
 
-            .visor-description {
-                font-size: 14px;
-            }
+    .gallery-item {
+        border-right: 1px solid #e4e6eb;
+    }
 
-            .image-visor.active .visor-image-container {
-                height: calc(100vh - 100px);
-            }
-        }
-    </style>
+    .gallery-item:nth-child(2n) {
+        border-right: none;
+    }
+
+    .page-title {
+        font-size: 24px;
+        padding: 18px 25px;
+    }
+}
+
+
+/* 📱 Tabletas verticales / Móviles grandes (481px a 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .page-title {
+        font-size: 20px;
+        padding: 12px 15px;
+    }
+
+    /* La galería se mantiene en una columna por defecto (flex-direction: column) */
+    .gallery-item-description {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    /* Visor */
+    .visor-description-container {
+        max-height: 120px;
+        padding: 15px;
+    }
+
+    .visor-close {
+        width: 38px;
+        height: 38px;
+        font-size: 22px;
+    }
+
+    .image-visor.active .visor-image-container {
+        height: calc(100vh - 120px);
+    }
+}
+
+/* 📲 Móviles pequeños (hasta 480px) */
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 18px;
+        padding: 10px 12px;
+    }
+
+    .gallery-item-description {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    /* Visor */
+    .visor-close {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+        top: 10px;
+        right: 10px;
+    }
+
+    .visor-description-container {
+        max-height: 100px;
+        padding: 12px;
+    }
+
+    .visor-description {
+        font-size: 14px;
+    }
+
+    .image-visor.active .visor-image-container {
+        height: calc(100vh - 100px);
+    }
+}
+
+
+/* --- CÓDIGO DEL VISOR (SIN CAMBIOS RELEVANTES EN RESPONSIVE) --- */
+
+/* Visor modal (fondo oscuro) */
+.image-visor {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.image-visor.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Botón de cerrar (X) */
+.visor-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: rgba(68, 73, 80, 0.8);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10002;
+    transition: background-color 0.2s, opacity 0.25s ease-out;
+    will-change: opacity;
+}
+
+.visor-close.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.visor-close:hover {
+    background-color: rgba(68, 73, 80, 1);
+}
+
+/* Contenedor de la imagen con zoom */
+.visor-image-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    cursor: pointer;
+    background-color: #000;
+}
+
+/* Wrapper para la transformación de la imagen */
+.visor-image-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Imagen principal del visor */
+.visor-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    user-select: none;
+    -webkit-user-select: none;
+    object-fit: contain;
+}
+
+/* Contenedor de la descripción */
+.visor-description-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #242526;
+    color: #e4e6eb;
+    overflow-y: auto;
+    transition: transform 0.25s ease-out;
+    transform: translateY(0);
+    z-index: 10001;
+    will-change: transform;
+}
+
+.visor-description-container.hidden {
+    transform: translateY(100%);
+}
+
+.visor-description {
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+
+
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Página principal con galería de imágenes -->
-    <div id="page-home" class="page-section">
-        <h1 class="page-title">Mis Fotos</h1>
-        
-        <div class="gallery-container" id="galleryContainer">
-            <!-- Las imágenes se generarán dinámicamente con JavaScript -->
+
+<div id="intro">
+  <canvas id="canvas"></canvas>
+  <img id="logo" src="leon6.PNG" alt="Logo">
+  <div id="text"></div>
+</div>
+
+<!--<div id="main"> -->
+ <!-- Página principal con galería de imágenes -->
+ <div id="page-home" class="page-section">
+    <h1 class="page-title">Mis Fotos</h1>
+    
+    <div class="gallery-container" id="galleryContainer">
+        <!-- Las imágenes se generarán dinámicamente con JavaScript -->
+    </div>
+</div>
+
+<!-- Visor de imágenes modal -->
+<div class="image-visor" id="imageVisor">
+    <button class="visor-close" id="visorClose" aria-label="Cerrar">&times;</button>
+    
+    <div class="visor-image-container" id="visorImageContainer">
+        <div class="visor-image-wrapper" id="visorImageWrapper">
+            <img src="" alt="" class="visor-image" id="visorImage">
         </div>
     </div>
-
-    <!-- Visor de imágenes modal -->
-    <div class="image-visor" id="imageVisor">
-        <button class="visor-close" id="visorClose" aria-label="Cerrar">&times;</button>
-        
-        <div class="visor-image-container" id="visorImageContainer">
-            <div class="visor-image-wrapper" id="visorImageWrapper">
-                <img src="" alt="" class="visor-image" id="visorImage">
-            </div>
-        </div>
-        
-        <div class="visor-description-container" id="visorDescriptionContainer">
-            <p class="visor-description" id="visorDescription"></p>
-        </div>
+    
+    <div class="visor-description-container" id="visorDescriptionContainer">
+        <p class="visor-description" id="visorDescription"></p>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/umd/photoswipe.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/umd/photoswipe-lightbox.umd.min.js"></script>
-    <script>
-        // Datos de ejemplo para las imágenes
-        const imageData = [
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/umd/photoswipe.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/umd/photoswipe-lightbox.umd.min.js"></script>
+
+
+
+
+
+
+
+<!--</div>-->
+
+
+
+<script>
+// COLORES NEÓN EXACTOS QUE PEDISTE
+
+const neonColors = [
+  "#000000", // negro (Fondo principal)
+  "#14FFAA", // cian brillante/aguamarina neón (Acentos principales, líneas, borde del logo)
+  "#FFFFFF"
+ // "#FF6600", // naranja brillante/rojo neón (Acento secundario, color del texto "PRODUCTOS DESTACADOS" y las llamas)
+  //"#00FFD5", // una variación de cian/aguamarina, muy brillante
+];
+
+
+
+
+
+
+
+// EFECTO WARP SPEED CON TUS COLORES
+const canvas = document.getElementById('canvas'); // Obtiene el elemento Canvas del DOM por su ID.
+const ctx = canvas.getContext('2d'); // Obtiene el contexto de renderizado 2D para poder dibujar en el Canvas.
+canvas.width = window.innerWidth; // Establece el ancho del Canvas al ancho total de la ventana.
+canvas.height = window.innerHeight; // Establece la altura del Canvas a la altura total de la ventana.
+
+const lines = []; // Array que almacenará los objetos que representan cada línea individual.
+for(let i = 0; i < 700; i++) { // Bucle para crear 700 líneas.
+  lines.push({ // Agrega un nuevo objeto de línea al array `lines`.
+    angle: Math.random() * Math.PI * 2, // Asigna un ángulo inicial aleatorio (en radianes) de 0 a 360 grados.
+    distance: Math.random() * 100, // Asigna una distancia inicial aleatoria desde el centro (pequeña, para simular el inicio).
+    speed: 5 + Math.random() * 18, // Asigna una velocidad de movimiento aleatoria entre 5 y 23 (5 + 18).
+    thickness: Math.random() * 4 + 1, // Asigna un grosor de línea aleatorio entre 1 y 5.
+    color: neonColors[Math.floor(Math.random() * neonColors.length)] // Selecciona un color aleatorio del array `neonColors`.
+  });
+}
+
+function draw() { // Define la función principal de dibujo que se llamará en cada fotograma (frame).
+  ctx.fillStyle = 'rgba(0,0,0,0.08)'; // Establece el color de relleno del fondo (negro con una ligera opacidad).
+  ctx.fillRect(0, 0, canvas.width, canvas.height); // Dibuja un rectángulo que cubre todo el Canvas, creando el efecto de "rastro" o *fade* (difuminado).
+
+  lines.forEach(line => { // Itera sobre cada objeto en el array `lines`.
+    line.distance += line.speed; // **Incrementa la distancia de la línea desde el centro según su propiedad `speed`**. Esto simula el movimiento hacia adelante.
+    const x = canvas.width/2 + Math.cos(line.angle) * line.distance; // Calcula la coordenada X final de la línea usando trigonometría (coseno). El punto de partida es el centro del Canvas.
+    const y = canvas.height/2 + Math.sin(line.angle) * line.distance; // Calcula la coordenada Y final de la línea usando trigonometría (seno).
+
+    ctx.globalAlpha = Math.min(line.distance / 250, 1); // Calcula la opacidad global (alpha). Aumenta la opacidad cuanto más se aleja la línea del centro (hasta un máximo de 1).
+    ctx.strokeStyle = line.color; // Establece el color del trazo de la línea.
+    ctx.lineWidth = line.thickness * ctx.globalAlpha; // Establece el grosor del trazo, haciéndolo más grueso (o fino) según la opacidad.
+    ctx.beginPath(); // Comienza una nueva ruta de dibujo.
+    ctx.moveTo(canvas.width/2, canvas.height/2); // Mueve el punto de inicio de la ruta al centro del Canvas.
+    ctx.lineTo(x, y); // Dibuja una línea desde el centro hasta la posición calculada (x, y).
+    ctx.stroke(); // Aplica el trazo (dibujo) de la línea con el color y grosor establecidos.
+
+    if (line.distance > Math.max(canvas.width, canvas.height) + 300) { // Comprueba si la línea ha viajado más allá de los límites visibles del Canvas (+ 300 píxeles extra de margen).
+      line.distance = 0; // Si ha salido, reinicia la distancia a 0 (vuelve a empezar desde el centro).
+      line.angle = Math.random() * Math.PI * 2; // Asigna un nuevo ángulo aleatorio para que se dirija en una nueva dirección.
+      line.color = neonColors[Math.floor(Math.random() * neonColors.length)]; // Asigna un nuevo color neón aleatorio.
+    }
+  });
+  requestAnimationFrame(draw); // Llama a la función `draw` de nuevo en el próximo ciclo de animación del navegador, creando el bucle continuo.
+}
+draw(); // Llama a la función `draw` por primera vez para iniciar la animación.
+
+window.addEventListener('resize', () => { // Agrega un "escuchador de eventos" para detectar cuando se cambia el tamaño de la ventana.
+  canvas.width = window.innerWidth; // Ajusta el ancho del Canvas al nuevo ancho de la ventana.
+  canvas.height = window.innerHeight; // Ajusta la altura del Canvas a la nueva altura de la ventana.
+});
+
+// SECUENCIA PERFECTA
+setTimeout(() => { // Establece un temporizador para ejecutar una acción después de 800 milisegundos.
+  document.getElementById('logo').classList.add('show'); // Obtiene el elemento con ID 'logo' y le añade la clase CSS 'show' para hacerlo aparecer.
+}, 700);
+
+setTimeout(() => { // Establece un temporizador para ejecutar una acción después de 2000 milisegundos (2 segundos).
+  const texto = "EVOLUCION"; // Define el texto que se va a escribir.
+  const div = document.getElementById('text'); // Obtiene el elemento con ID 'text'.
+  div.classList.add('show');  // Añade la clase 'show' para hacerlo visible (según el CSS).
+  let i = 0; // Inicializa un contador para la posición del carácter actual.
+  const type = () => { // Define la función recursiva para el efecto de "máquina de escribir".
+    if (i < texto.length) { // Comprueba si aún quedan caracteres por escribir.
+      div.textContent += texto[i++]; // Agrega el siguiente carácter del texto al contenido del elemento `div` e incrementa el contador.
+      setTimeout(type, 90); // Llama a la función `type` de nuevo después de 90 milisegundos para escribir el siguiente carácter.
+    }
+  };
+  type(); // Inicia la función de escritura.
+}, 1000);
+
+// DESAPARECE TODO JUNTO AL MISMO TIEMPO (7 segundos total)
+setTimeout(() => { // Establece un temporizador para ejecutar una acción después de 7000 milisegundos (7 segundos).
+  const intro = document.getElementById('intro'); // Obtiene el contenedor principal de la introducción.
+  intro.style.opacity = '0';  // Establece la opacidad del contenedor a 0, creando un efecto de *fade out*.
+  setTimeout(() => { // Establece un temporizador anidado para ejecutar una acción después de 1400 milisegundos (la duración del fade out).
+    intro.style.display = 'none'; // Una vez que la opacidad es 0, oculta el contenedor por completo para liberar espacio.
+    document.getElementById('main').style.opacity = '1'; // Obtiene el elemento con ID 'main' (el contenido principal) y lo hace aparecer (asumiendo que inicialmente tenía opacidad 0).
+  }, 1400); // Duración del *fade out*.
+}, 4000); // Tiempo total de la introducción antes de que comience el fade out.
+
+
+
+
+  // Datos de ejemplo para las imágenes
+  const imageData = [
             {
                 src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
                 description: 'Hermoso paisaje de montañas al atardecer con cielo despejado y nubes rosadas.'
@@ -692,6 +936,14 @@
 
         // Inicializar la galería al cargar la página
         generateGallery();
-    </script>
+
+
+
+
+
+
+
+
+</script>
 </body>
 </html>
